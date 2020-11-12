@@ -4,6 +4,8 @@
 
 Важно: [Примеры кода из лекций](https://github.com/netology-code/jspr-code)
 
+Важно: [Как установить Intellij IDEA Ultimate](https://github.com/netology-code/jspr-homeworks/blob/master/idea-installation.md)
+
 ## Блок 1: Web
 
 1.1 [x] [HTTP и современный Web](01_web)
