@@ -23,7 +23,7 @@
 
 В рамках изучения Java Core и изучения работы протокола HTTP вы использовали библиотеку HttpClient из состава [Apache HttpComponents](https://hc.apache.org).
 
-В состав данной библиотеки входит утилитный класс [URLEncodedUtils](http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/utils/URLEncodedUtils.html), который и позволяет "парсить" Query String, извлекая параметры.
+В состав данной библиотеки входит утилитный класс [URLEncodedUtils](https://www.javadoc.io/doc/org.apache.httpcomponents/httpclient/4.5.1/org/apache/http/client/utils/URLEncodedUtils.html), который и позволяет "парсить" Query String, извлекая параметры.
 
 Необходимо добавить в ваш сервер (из предыдущего ДЗ) функциональность обработки параметров запроса так, чтобы можно было из объекта типа `Request` отдельно получать и путь запроса, и параметры из Query String.
 
