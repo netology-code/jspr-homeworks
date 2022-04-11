@@ -2,8 +2,8 @@ package ru.netology;
 
 public class Main {
   public static void main(String[] args) {
-    Server myServer = new Server();
-    myServer.listen();
+    final var server = new Server();
+    server.listen();
   }
 }
 

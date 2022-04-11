@@ -32,7 +32,7 @@ public class Server {
 
     public void handle(Socket socket) {
         try (final var in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             final var out = new BufferedOutputStream(socket.getOutputStream());
+             final var out = new BufferedOutputStream(socket.getOutputStream())
         ) {
             log("client connected: " + socket.getRemoteSocketAddress());
             // read only request line for simplicity
@@ -58,9 +58,8 @@ public class Server {
                 return;
             }
 
-            final var filePath = Path.of("http-server", "public", path);
+            final var filePath = Path.of(".", "public", path);
             final var mimeType = Files.probeContentType(filePath);
-//          final var mimeType = "text/plain";
             // special case for classic
             if (path.equals("/classic.html")) {
                 final var template = Files.readString(filePath);
