@@ -9,12 +9,15 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 public class Server {
 
     private final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, Handler>> handlers = new ConcurrentHashMap<>();
 
     public void listen() {
         var poolExecutor = Executors.newFixedThreadPool(64);
@@ -35,6 +38,7 @@ public class Server {
              final var out = new BufferedOutputStream(socket.getOutputStream())
         ) {
             log("client connected: " + socket.getRemoteSocketAddress());
+            Request request = new Request();
             // read only request line for simplicity
             // must be in form GET /path HTTP/1.1
             final var requestLine = in.readLine();
@@ -45,6 +49,8 @@ public class Server {
                 log("Invalid request");
                 return;
             }
+
+            request.setMethod(parts[0]);
 
             final var path = parts[1];
             if (!validPaths.contains(path)) {
@@ -57,6 +63,24 @@ public class Server {
                 out.flush();
                 return;
             }
+
+            request.setUrl(path);
+
+            String line;
+            int ind;
+            var headers = new HashMap<String, String>();
+
+            line = in.readLine();
+            while (!line.equals("")) {
+                ind = line.indexOf(':');
+                if (ind > 0) {
+                    headers.put(line.substring(0, ind).toLowerCase(), line.substring(ind + 1).trim());
+                }
+                line = in.readLine();
+            }
+
+            request.setHeaders(headers);
+            handlers.get(request.getMethod()).get(request.getUrl()).handle(request, out);
 
             final var filePath = Path.of(".", "public", path);
             final var mimeType = Files.probeContentType(filePath);
