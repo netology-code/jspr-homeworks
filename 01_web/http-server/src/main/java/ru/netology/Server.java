@@ -47,14 +47,13 @@ public class Server {
                 return;
             }
 
-            if (!validPaths.contains(path)) {
-                badRequest(out);
-                return;
-            }
-
             if (handlers.get(method).contains(path)) {
                 handlers.get(method).get(path).handle(request, out);
             } else {
+                if (!validPaths.contains(path)) {
+                    notFound(out);
+                    return;
+                }
                 final var filePath = Path.of(".", "public", path);
                 final var mimeType = Files.probeContentType(filePath);
                 // special case for classic
@@ -100,6 +99,16 @@ public class Server {
     private void badRequest(BufferedOutputStream out) throws IOException {
         out.write((
                 "HTTP/1.1 400 Bad Request\r\n" +
+                        "Content-Length: 0\r\n" +
+                        "Connection: close\r\n" +
+                        "\r\n"
+        ).getBytes());
+        out.flush();
+    }
+
+    private void notFound(BufferedOutputStream out) throws IOException {
+        out.write((
+                "HTTP/1.1 404 Not found\r\n" +
                         "Content-Length: 0\r\n" +
                         "Connection: close\r\n" +
                         "\r\n"
