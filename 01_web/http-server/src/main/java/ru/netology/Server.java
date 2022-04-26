@@ -3,6 +3,7 @@ package ru.netology;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class Server {
             Request request = new Request(in, 4096);
 
             final var requestLine = request.getRequestLine();
-            final var path = request.getPath();
+            final var path = request.getPath().split("\\?")[0];
             final var method = request.getMethod();
             final var headers = request.getHeaders();
 
@@ -47,8 +48,9 @@ public class Server {
                 return;
             }
 
-            if (handlers.get(method).contains(path)) {
+            if (!handlers.isEmpty() && handlers.get(method).contains(path)) {
                 handlers.get(method).get(path).handle(request, out);
+
             } else {
                 if (!validPaths.contains(path)) {
                     notFound(out);
@@ -74,9 +76,12 @@ public class Server {
                 normalRequest(out, mimeType, length);
                 Files.copy(filePath, out);
                 log(filePath.getFileName() + " loaded");
+                System.out.println(request.extractQueryParameters());
             }
             out.flush();
         } catch (IOException e) {
+            e.printStackTrace(System.out);
+        } catch (URISyntaxException e) {
             e.printStackTrace(System.out);
         }
     }

@@ -1,9 +1,14 @@
 package ru.netology;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Request {
     private String[] requestLine;
@@ -116,5 +121,28 @@ public class Request {
                 .map(o -> o.substring(o.indexOf(" ")))
                 .map(String::trim)
                 .findFirst();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Map<String, Object> extractQueryParameters() throws URISyntaxException, MalformedURLException {
+        URL url = new URL("http://localhost:9999/"+path);
+        List<NameValuePair> parameters = URLEncodedUtils.parse(url.toURI(), StandardCharsets.UTF_8.name());
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (NameValuePair parameter : parameters) {
+            if (result.containsKey(parameter.getName())) {
+                Object currentValue = result.get(parameter.getName());
+                if (currentValue instanceof List) {
+                    ((List) currentValue).add(parameter.getValue());
+                } else {
+                    List<Object> values = new ArrayList<>();
+                    values.add(currentValue);
+                    values.add(parameter.getValue());
+                    result.put(parameter.getName(), values);
+                }
+            } else {
+                result.put(parameter.getName(), parameter.getValue());
+            }
+        }
+        return result;
     }
 }
