@@ -76,7 +76,7 @@ public class Server {
                 normalRequest(out, mimeType, length);
                 Files.copy(filePath, out);
                 log(filePath.getFileName() + " loaded");
-                System.out.println(request.extractQueryParameters());
+                System.out.println(request.getQueryParams());
             }
             out.flush();
         } catch (IOException e) {

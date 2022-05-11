@@ -18,7 +18,9 @@ public class Request {
     private String body;
     private final BufferedInputStream in;
     private final int limit;
+    private Map<String, Object> queryParams;
     final List<String> allowedMethods = List.of("GET", "POST");
+    final URL DEFAULT_URL = new URL("http://localhost:9999/");
 
     public Request(BufferedInputStream in, int limit) throws IOException {
         this.in = in;
@@ -124,25 +126,36 @@ public class Request {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Map<String, Object> extractQueryParameters() throws URISyntaxException, MalformedURLException {
-        URL url = new URL("http://localhost:9999/"+path);
-        List<NameValuePair> parameters = URLEncodedUtils.parse(url.toURI(), StandardCharsets.UTF_8.name());
-        Map<String, Object> result = new LinkedHashMap<>();
-        for (NameValuePair parameter : parameters) {
-            if (result.containsKey(parameter.getName())) {
-                Object currentValue = result.get(parameter.getName());
-                if (currentValue instanceof List) {
-                    ((List) currentValue).add(parameter.getValue());
+    public Map<String, Object> getQueryParams() throws URISyntaxException, MalformedURLException {
+        if (queryParams == null) {
+            URL url = new URL(DEFAULT_URL + path);
+            List<NameValuePair> parameters = URLEncodedUtils.parse(url.toURI(), StandardCharsets.UTF_8.name());
+            queryParams = new LinkedHashMap<>();
+            for (NameValuePair parameter : parameters) {
+                if (queryParams.containsKey(parameter.getName())) {
+                    Object currentValue = queryParams.get(parameter.getName());
+                    if (currentValue instanceof List) {
+                        ((List) currentValue).add(parameter.getValue());
+                    } else {
+                        List<Object> values = new ArrayList<>();
+                        values.add(currentValue);
+                        values.add(parameter.getValue());
+                        queryParams.put(parameter.getName(), values);
+                    }
                 } else {
-                    List<Object> values = new ArrayList<>();
-                    values.add(currentValue);
-                    values.add(parameter.getValue());
-                    result.put(parameter.getName(), values);
+                    queryParams.put(parameter.getName(), parameter.getValue());
                 }
-            } else {
-                result.put(parameter.getName(), parameter.getValue());
             }
         }
+        return queryParams;
+    }
+
+    public List<Object> getQueryParam(String name) throws MalformedURLException, URISyntaxException {
+        List<Object> result = new ArrayList<>();
+        var param = getQueryParams().get(name);
+        if (!(param instanceof List)) {
+            result.add(param);
+        } else result = (List) param;
         return result;
     }
 }
