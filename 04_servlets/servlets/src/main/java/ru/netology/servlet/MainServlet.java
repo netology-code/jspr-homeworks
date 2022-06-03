@@ -1,7 +1,8 @@
 package ru.netology.servlet;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.netology.controller.PostController;
-import ru.netology.repository.PostRepository;
+import ru.netology.exception.NotFoundException;
 import ru.netology.service.PostService;
 
 import javax.servlet.http.HttpServlet;
@@ -13,9 +14,14 @@ public class MainServlet extends HttpServlet {
 
     @Override
     public void init() {
-        final var repository = new PostRepository();
-        final var service = new PostService(repository);
-        controller = new PostController(service);
+        try (var context = new AnnotationConfigApplicationContext("ru.netology")) {
+
+            controller = (PostController) context.getBean("postController");
+
+            final var service = context.getBean(PostService.class);
+
+            final var isSame = service == context.getBean("postService");
+        }
     }
 
     @Override
@@ -45,6 +51,9 @@ public class MainServlet extends HttpServlet {
                 controller.removeById(id, resp);
                 return;
             }
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (NotFoundException nfe) {
+            nfe.printStackTrace();
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
             e.printStackTrace();
