@@ -18,7 +18,9 @@ public class PostRepository {
     }
 
     public Optional<Post> getById(long id) {
-        return Optional.of(map.get(id));
+        var post = map.get(id);
+        if (post != null) return Optional.of(post);
+        else return Optional.empty();
     }
 
     public Post save(Post post) {
