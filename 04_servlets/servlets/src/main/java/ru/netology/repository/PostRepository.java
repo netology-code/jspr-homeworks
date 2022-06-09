@@ -8,17 +8,18 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Repository
 public class PostRepository {
     private final ConcurrentHashMap<Long, Post> map = new ConcurrentHashMap<>();
-    private final AtomicLong counter = new AtomicLong(0);
+    private final AtomicLong counter = new AtomicLong(1);
 
     public List<Post> all() {
         return new ArrayList<>(map.values());
     }
 
     public Optional<Post> getById(long id) {
-        return Optional.of(map.get(id));
+        var post = map.get(id);
+        if (post != null) return Optional.of(post);
+        else return Optional.empty();
     }
 
     public Post save(Post post) {
